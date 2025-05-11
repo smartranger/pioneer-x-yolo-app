@@ -10,4 +10,4 @@ find_package(ncnn REQUIRED)
 
 add_library(yolov8ncnn SHARED yolov8ncnn.cpp yolo.cpp ndkcamera.cpp)
 
-target_link_libraries(yolov8ncnn ncnn ${OpenCV_LIBS} camera2ndk mediandk)
+target_link_libraries(yolov8ncnn ncnn ${OpenCV_LIBS} camera2ndk mediandk jnigraphics android log)

@@ -16,6 +16,7 @@
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <android/asset_manager_jni.h>
 
 #include "cpu.h"
 
@@ -222,8 +223,21 @@ Yolo::Yolo()
 {
     blob_pool_allocator.set_size_compare_ratio(0.f);
     workspace_pool_allocator.set_size_compare_ratio(0.f);
+    
+    // 默认启用UI
+    enable_ui = true;
+    language_id = 1; // 默认使用英文
 }
 
+void Yolo::setUIOptions(bool showUI) 
+{
+    enable_ui = showUI;
+}
+
+void Yolo::setLanguage(int languageID) 
+{
+    language_id = languageID;
+}
 
 int Yolo::load(AAssetManager* mgr, const char* modeltype, int _target_size, const float* _mean_vals, const float* _norm_vals, bool use_gpu)
 {
@@ -354,9 +368,10 @@ int Yolo::detect(const cv::Mat& rgb, std::vector<Object>& objects, float prob_th
     return 0;
 }
 
-int Yolo::draw(cv::Mat& rgb, const std::vector<Object>& objects)
+const char* Yolo::getLabelText(int label)
 {
-    static const char* class_names[] = {
+    // 英文标签定义
+    static const char* english_class_names[] = {
         "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light",
         "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow",
         "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee",
@@ -367,6 +382,19 @@ int Yolo::draw(cv::Mat& rgb, const std::vector<Object>& objects)
         "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase", "scissors", "teddy bear",
         "hair drier", "toothbrush"
     };
+
+    // 保证索引不越界
+    if (label < 0 || label >= 80)
+        return "unknown";
+    
+    return english_class_names[label];
+}
+
+int Yolo::draw(cv::Mat& rgb, const std::vector<Object>& objects)
+{
+    // 如果UI被禁用，直接返回
+    if (!enable_ui)
+        return 0;
 
     static const unsigned char colors[19][3] = {
         { 54,  67, 244},
@@ -396,34 +424,52 @@ int Yolo::draw(cv::Mat& rgb, const std::vector<Object>& objects)
     {
         const Object& obj = objects[i];
 
-//         fprintf(stderr, "%d = %.5f at %.2f %.2f %.2f x %.2f\n", obj.label, obj.prob,
-//                 obj.rect.x, obj.rect.y, obj.rect.width, obj.rect.height);
-
+        // 使用标准样式颜色（按对象顺序循环颜色）
         const unsigned char* color = colors[color_index % 19];
         color_index++;
 
         cv::Scalar cc(color[0], color[1], color[2]);
-
+        
+        // 绘制边框，使用标准样式的2px粗度
         cv::rectangle(rgb, obj.rect, cc, 2);
 
-        char text[256];
-        sprintf(text, "%s %.1f%%", class_names[obj.label], obj.prob * 100);
+        // 准备标签文本
+        std::string text;
+        
+        // 获取标签文本
+        const char* class_label = getLabelText(obj.label);
+        
+        // 标准样式显示类名和概率
+        char prob_str[32];
+        snprintf(prob_str, sizeof(prob_str), " %.1f%%", obj.prob * 100);
+        text = std::string(class_label) + prob_str;
 
+        // 标准样式使用0.5的字体大小
+        double font_scale = 0.5;
+
+        // 使用OpenCV获取文本尺寸
         int baseLine = 0;
-        cv::Size label_size = cv::getTextSize(text, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
+        cv::Size label_size = cv::getTextSize(text, cv::FONT_HERSHEY_SIMPLEX, font_scale, 1, &baseLine);
 
+        // 标签位置计算
         int x = obj.rect.x;
         int y = obj.rect.y - label_size.height - baseLine;
+        
+        // 确保标签在画面内
         if (y < 0)
             y = 0;
         if (x + label_size.width > rgb.cols)
             x = rgb.cols - label_size.width;
 
+        // 绘制标签背景
         cv::rectangle(rgb, cv::Rect(cv::Point(x, y), cv::Size(label_size.width, label_size.height + baseLine)), cc, -1);
 
+        // 确定文字颜色：基于背景色亮度自动选择黑色或白色
         cv::Scalar textcc = (color[0] + color[1] + color[2] >= 381) ? cv::Scalar(0, 0, 0) : cv::Scalar(255, 255, 255);
 
-        cv::putText(rgb, text, cv::Point(x, y + label_size.height), cv::FONT_HERSHEY_SIMPLEX, 0.5, textcc, 1);
+        // 使用OpenCV绘制英文
+        cv::putText(rgb, text, cv::Point(x, y + label_size.height), 
+                    cv::FONT_HERSHEY_SIMPLEX, font_scale, textcc, 1);
     }
 
     return 0;

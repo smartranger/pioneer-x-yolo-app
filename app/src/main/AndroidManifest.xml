@@ -6,14 +6,26 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera2.full" />
 
-    <application android:label="@string/app_name">
-        <activity android:name="MainActivity"
-                  android:label="@string/app_name"
+    <application android:label="@string/app_name"
+                 android:usesCleartextTraffic="true">
+        <activity android:name=".SplashActivity"
+                  android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
                   android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        
+        <activity android:name=".MainActivity"
+                  android:label="@string/app_name"
+                  android:screenOrientation="portrait">
+        </activity>
+        
+        <activity android:name=".AppInfoActivity"
+                  android:label="应用说明"
+                  android:theme="@android:style/Theme.NoTitleBar"
+                  android:screenOrientation="portrait">
         </activity>
     </application>
 </manifest> 

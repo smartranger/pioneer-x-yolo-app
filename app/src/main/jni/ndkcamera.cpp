@@ -427,8 +427,15 @@ NdkCameraWindow::NdkCameraWindow() : NdkCamera()
     sensor_event_queue = 0;
     accelerometer_sensor = 0;
     win = 0;
-
     accelerometer_orientation = 0;
+    
+    // 初始化渲染尺寸
+    render_w = 640;
+    render_h = 480;
+    
+    // 初始化预览状态和单次捕获标志
+    is_preview_paused = false;
+    request_capture_flag = false;
 
     // sensor
     sensor_manager = ASensorManager_getInstance();
@@ -473,6 +480,18 @@ void NdkCameraWindow::on_image_render(cv::Mat& rgb) const
 
 void NdkCameraWindow::on_image(const unsigned char* nv21, int nv21_width, int nv21_height) const
 {
+    // 如果预览暂停且没有单次捕获请求，则直接返回
+    if (is_preview_paused && !request_capture_flag)
+    {
+        return;
+    }
+    
+    // 如果是单次捕获请求，处理完后重置标志
+    if (request_capture_flag)
+    {
+        request_capture_flag = false;
+    }
+    
     // resolve orientation from camera_orientation and accelerometer_sensor
     {
         if (!sensor_event_queue)
@@ -768,4 +787,34 @@ void NdkCameraWindow::on_image(const unsigned char* nv21, int nv21_width, int nv
     }
 
     ANativeWindow_unlockAndPost(win);
+}
+
+// 实现获取相机宽度方法
+int NdkCameraWindow::get_width() const
+{
+    return render_w; // 返回渲染宽度
+}
+
+// 实现获取相机高度方法
+int NdkCameraWindow::get_height() const
+{
+    return render_h; // 返回渲染高度
+}
+
+// 暂停相机预览的实现
+void NdkCameraWindow::pause_camera()
+{
+    is_preview_paused = true;
+}
+
+// 恢复相机预览的实现
+void NdkCameraWindow::resume_camera()
+{
+    is_preview_paused = false;
+}
+
+// 请求单次捕获的实现
+void NdkCameraWindow::request_capture()
+{
+    request_capture_flag = true;
 }

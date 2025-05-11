@@ -43,6 +43,15 @@ public:
     int detect(const cv::Mat& rgb, std::vector<Object>& objects, float prob_threshold = 0.4f, float nms_threshold = 0.5f);
 
     int draw(cv::Mat& rgb, const std::vector<Object>& objects);
+    
+    // 设置UI选项，只保留显示/隐藏参数
+    void setUIOptions(bool showUI);
+    
+    // 设置语言选项：0=中文, 1=英文
+    void setLanguage(int languageID);
+    
+    // 将标签编号转换为可显示的文本
+    const char* getLabelText(int label);
 
 private:
     ncnn::Net yolo;
@@ -51,6 +60,10 @@ private:
     float norm_vals[3];
     ncnn::UnlockedPoolAllocator blob_pool_allocator;
     ncnn::PoolAllocator workspace_pool_allocator;
+    
+    // UI控制变量
+    bool enable_ui;    // 是否显示UI
+    int language_id;   // 语言: 0=中文, 1=英文
 };
 
 #endif // NANODET_H

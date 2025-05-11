@@ -67,14 +67,39 @@ public:
 
     virtual void on_image(const unsigned char* nv21, int nv21_width, int nv21_height) const;
 
+    // 获取相机宽度
+    int get_width() const;
+    
+    // 获取相机高度
+    int get_height() const;
+    
+    // 暂停相机预览
+    void pause_camera();
+    
+    // 恢复相机预览
+    void resume_camera();
+    
+    // 请求单次捕获和处理
+    void request_capture();
+
 public:
     mutable int accelerometer_orientation;
+    
+    // 添加渲染宽度和高度为成员变量
+    mutable int render_w;
+    mutable int render_h;
 
 private:
     ASensorManager* sensor_manager;
     mutable ASensorEventQueue* sensor_event_queue;
     const ASensor* accelerometer_sensor;
     ANativeWindow* win;
+    
+    // 添加相机预览状态标志
+    bool is_preview_paused;
+    
+    // 添加单次捕获请求标志
+    mutable bool request_capture_flag;
 };
 
 #endif // NDKCAMERA_H

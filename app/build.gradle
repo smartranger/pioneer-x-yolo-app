@@ -5,6 +5,11 @@ android {
 
     compileSdkVersion 34
 
+    aaptOptions {
+        cruncherEnabled = false
+        useNewCruncher = false
+    }
+
     defaultConfig {
         applicationId "com.tencent.yolov8ncnn"
         archivesBaseName = "$applicationId"

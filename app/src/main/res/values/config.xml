@@ -1,17 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- 启动页配置 -->
-    <string name="splash_image_path">images/splash.jpg</string>
-    <integer name="splash_delay_time">3000</integer>
-    
-    <!-- 声音配置 -->
-    <string name="detection_sound_resource">detection_sound</string>
-    
-    <!-- App说明页面配置 -->
-    <string name="app_info_text">应用说明</string>
-    
-    <!-- 主界面配置 -->
+
+    <!-- 识别目标配置 -->
     <integer name="default_target_label">0</integer>
+
+    <!-- 声音配置，在res/raw/ -->
+    <string name="detection_sound_resource">detection_sound</string>
+
+    <!-- App描述 -->
+    <string name="app_info_text">[App Description]</string>
+
+    <!-- App名称 -->
+    <string name="config_app_name">[App Name]</string>
+
+    <!-- App图标 在 res/mipmap/ic_launcher -->
+    
+    <!-- 开屏图片配置 在 res/drawable/-->
+    <string name="splash_image_path">splash</string>
     
     <!-- 更多配置项可以在此处添加 -->
+    <integer name="splash_delay_time">3000</integer>
+
 </resources> 

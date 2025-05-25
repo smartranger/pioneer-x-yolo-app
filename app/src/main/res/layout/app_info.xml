@@ -9,7 +9,7 @@
         android:id="@+id/textViewTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="应用使用说明"
+        android:text="App说明"
         android:textSize="22sp"
         android:textStyle="bold"
         android:textColor="@android:color/black"

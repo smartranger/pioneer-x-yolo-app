@@ -16,9 +16,6 @@ package com.tencent.yolov8ncnn;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.res.AssetManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -29,9 +26,6 @@ import android.view.animation.AlphaAnimation;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
-
-import java.io.IOException;
-import java.io.InputStream;
 
 public class SplashActivity extends Activity {
     
@@ -82,24 +76,23 @@ public class SplashActivity extends Activity {
     }
     
     /**
-     * 从assets指定位置加载启动图片
+     * 从res/drawable目录加载启动图片
      */
     private void loadSplashImage() {
         try {
-            // 从assets/images/目录加载启动图片
-            InputStream is = getAssets().open(SPLASH_IMAGE_PATH);
-            Bitmap bitmap = BitmapFactory.decodeStream(is);
-            is.close();
+            // 从res/drawable/目录加载启动图片
+            // 通过资源名称获取资源ID
+            int resourceId = getResources().getIdentifier(SPLASH_IMAGE_PATH, "drawable", getPackageName());
             
-            if (bitmap != null) {
-                // 设置图片到ImageView
-                mSplashImageView.setImageBitmap(bitmap);
+            if (resourceId != 0) {
+                // 直接设置资源ID到ImageView
+                mSplashImageView.setImageResource(resourceId);
                 Log.d(TAG, "成功加载启动图片: " + SPLASH_IMAGE_PATH);
             } else {
-                Log.e(TAG, "图片解码失败");
-                Toast.makeText(this, "无法加载启动图片", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "找不到资源: " + SPLASH_IMAGE_PATH);
+                Toast.makeText(this, "找不到启动图片资源", Toast.LENGTH_SHORT).show();
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             Log.e(TAG, "加载启动图片失败: " + e.getMessage());
             Toast.makeText(this, "加载启动图片出错: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }

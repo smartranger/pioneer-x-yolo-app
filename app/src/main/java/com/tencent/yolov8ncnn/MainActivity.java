@@ -192,11 +192,11 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback
             if (detectedObjects.length == 1) {
                 String detectedLabel = getLabelText(detectedObjects[0].label);
                 // updateDetectionStatus(false, "错误: 目标是" + targetLabel + "，检测到" + detectedLabel);
-                updateDetectionStatus(false, "不是目标物体");
+                updateDetectionStatus(false, getString(R.string.prompt_message2));
             } else {
                 // 多个物体中有非目标标签
                 // updateDetectionStatus(false, "错误: 存在非目标物体");
-                updateDetectionStatus(false, "未识别");
+                updateDetectionStatus(false, getString(R.string.prompt_message2));
             }
         }
     }

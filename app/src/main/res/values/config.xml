@@ -8,7 +8,10 @@
     <string name="detection_sound_resource">detection_sound</string>
 
     <!-- App描述 -->
-    <string name="app_info_text">[App Description]</string>
+    <string name="app_info_text">[App Info Text]</string>
+
+    <!-- 没有识别到时提示信息 -->
+    <string name="prompt_message2">[Prompt Message 2]</string>
 
     <!-- App名称 -->
     <string name="config_app_name">[App Name]</string>
@@ -21,4 +24,4 @@
     <!-- 更多配置项可以在此处添加 -->
     <integer name="splash_delay_time">3000</integer>
 
-</resources> 
+</resources>

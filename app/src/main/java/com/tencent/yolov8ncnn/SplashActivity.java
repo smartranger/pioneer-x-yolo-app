@@ -16,6 +16,9 @@ package com.tencent.yolov8ncnn;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.AssetManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -27,12 +30,14 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 public class SplashActivity extends Activity {
     
     private static final String TAG = "SplashActivity";
     private RelativeLayout mOverlayContainer;
     private ImageView mSplashImageView;
-    private String SPLASH_IMAGE_PATH;
     private int DELAY_TIME;
     
     @Override
@@ -40,7 +45,6 @@ public class SplashActivity extends Activity {
         super.onCreate(savedInstanceState);
         
         // 从配置文件中获取参数
-        SPLASH_IMAGE_PATH = getString(R.string.splash_image_path);
         DELAY_TIME = getResources().getInteger(R.integer.splash_delay_time);
         
         // 设置全屏
@@ -76,24 +80,48 @@ public class SplashActivity extends Activity {
     }
     
     /**
-     * 从res/drawable目录加载启动图片
+     * 从assets/res目录加载启动图片
      */
     private void loadSplashImage() {
         try {
-            // 从res/drawable/目录加载启动图片
-            // 通过资源名称获取资源ID
-            int resourceId = getResources().getIdentifier(SPLASH_IMAGE_PATH, "drawable", getPackageName());
+            AssetManager assetManager = getAssets();
+            String imagePath = "res/splash";
             
-            if (resourceId != 0) {
-                // 直接设置资源ID到ImageView
-                mSplashImageView.setImageResource(resourceId);
-                Log.d(TAG, "成功加载启动图片: " + SPLASH_IMAGE_PATH);
+            // 尝试不同的文件扩展名
+            String[] extensions = {".png", ".jpg", ".jpeg", ".webp"};
+            InputStream inputStream = null;
+            String successPath = null;
+            
+            for (String ext : extensions) {
+                try {
+                    String fullPath = imagePath + ext;
+                    inputStream = assetManager.open(fullPath);
+                    successPath = fullPath;
+                    break;
+                } catch (IOException e) {
+                    // 尝试下一个扩展名
+                    continue;
+                }
+            }
+            
+            if (inputStream != null) {
+                // 将InputStream转换为Bitmap
+                Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+                if (bitmap != null) {
+                    // 设置Bitmap到ImageView
+                    mSplashImageView.setImageBitmap(bitmap);
+                    Log.d(TAG, "成功从assets加载启动图片: " + successPath);
+                } else {
+                    Log.e(TAG, "无法解码图片: " + successPath);
+                    Toast.makeText(this, "图片解码失败", Toast.LENGTH_SHORT).show();
+                }
+                inputStream.close();
             } else {
-                Log.e(TAG, "找不到资源: " + SPLASH_IMAGE_PATH);
-                Toast.makeText(this, "找不到启动图片资源", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "在assets/res/目录下找不到图片: ");
+                Toast.makeText(this, "找不到启动图片文件", Toast.LENGTH_SHORT).show();
             }
         } catch (Exception e) {
-            Log.e(TAG, "加载启动图片失败: " + e.getMessage());
+            Log.e(TAG, "从assets加载启动图片失败: " + e.getMessage());
             Toast.makeText(this, "加载启动图片出错: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }

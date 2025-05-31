@@ -4,8 +4,9 @@
     <!-- 识别目标配置 -->
     <integer name="default_target_label">0</integer>
 
-    <!-- 声音配置，在res/raw/ -->
-    <string name="detection_sound_resource">detection_sound</string>
+    <!-- assets/res根目录 -->
+    <!-- 开屏图片默认名称splash。支持".png", ".jpg", ".jpeg", ".webp"后缀。 -->
+    <!-- 声音默认文件名detection_sound。支持".mp3", ".wav", ".ogg", ".m4a"后缀。 -->
 
     <!-- App描述 -->
     <string name="app_info_text">[App Info Text]</string>
@@ -17,9 +18,6 @@
     <string name="config_app_name">[App Name]</string>
 
     <!-- App图标 在 res/mipmap/ic_launcher -->
-    
-    <!-- 开屏图片配置 在 res/drawable/-->
-    <string name="splash_image_path">splash</string>
     
     <!-- 更多配置项可以在此处添加 -->
     <integer name="splash_delay_time">3000</integer>

@@ -11,7 +11,8 @@
                  android:icon="@mipmap/ic_launcher">
         <activity android:name=".SplashActivity"
                   android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
-                  android:screenOrientation="portrait">
+                  android:screenOrientation="portrait"
+                  android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -20,13 +21,15 @@
         
         <activity android:name=".MainActivity"
                   android:label="@string/config_app_name"
-                  android:screenOrientation="portrait">
+                  android:screenOrientation="portrait"
+                  android:exported="false">
         </activity>
         
         <activity android:name=".AppInfoActivity"
                   android:label="应用说明"
                   android:theme="@android:style/Theme.NoTitleBar"
-                  android:screenOrientation="portrait">
+                  android:screenOrientation="portrait"
+                  android:exported="false">
         </activity>
     </application>
 </manifest> 

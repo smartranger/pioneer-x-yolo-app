@@ -39,6 +39,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 
 import android.media.MediaPlayer;
+import android.content.res.AssetFileDescriptor;
+import android.content.res.AssetManager;
 
 public class MainActivity extends Activity implements SurfaceHolder.Callback
 {
@@ -227,25 +229,71 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback
         }
     }
 
+    // 通用音频加载方法，支持多种格式
+    private boolean loadAudioFromAssets(MediaPlayer player) {
+        // 支持的音频格式
+        String[] supportedFormats = {".mp3", ".wav", ".ogg", ".m4a"};
+        
+        try {
+            AssetManager assetManager = getAssets();
+            AssetFileDescriptor afd = null;
+            
+            // 尝试不同的音频格式
+            for (String format : supportedFormats) {
+                try {
+                    String fullFileName = "res/detection_sound" + format;
+                    afd = assetManager.openFd(fullFileName);
+                    Log.i("MainActivity", "成功找到音频文件: " + fullFileName);
+                    break;
+                } catch (Exception e) {
+                    Log.d("MainActivity", "音频文件不存在: res/detection_sound" + format);
+                    continue;
+                }
+            }
+            
+            if (afd == null) {
+                Log.e("MainActivity", "未找到音频文件: detection_sound (尝试了所有支持的格式)");
+                return false;
+            }
+            
+            player.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+            player.prepare();
+            afd.close();
+            player.setVolume(1.0f, 1.0f);
+            
+            Log.i("MainActivity", "音频文件加载成功: detection_sound");
+            return true;
+            
+        } catch (Exception e) {
+            Log.e("MainActivity", "加载音频文件失败: detection_sound" + ", 错误: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    // 创建并初始化MediaPlayer
+    private MediaPlayer createMediaPlayer() {
+        try {
+            MediaPlayer player = new MediaPlayer();
+            
+            if (loadAudioFromAssets(player)) {
+                return player;
+            } else {
+                player.release();
+                return null;
+            }
+        } catch (Exception e) {
+            Log.e("MainActivity", "创建 MediaPlayer 失败: " + e.getMessage());
+            return null;
+        }
+    }
+
     // 播放检测提示音
     private void playDetectionSound() {
         if (mediaPlayer == null) {
             Log.e("MainActivity", "MediaPlayer 为空，尝试重新创建");
-            try {
-                // 从配置文件获取音频资源ID
-                int soundResourceId = getResources().getIdentifier(
-                    getString(R.string.detection_sound_resource), 
-                    "raw", 
-                    getPackageName()
-                );
-                mediaPlayer = MediaPlayer.create(this, soundResourceId);
-                if (mediaPlayer == null) {
-                    Log.e("MainActivity", "重新创建 MediaPlayer 失败");
-                    return;
-                }
-                mediaPlayer.setVolume(1.0f, 1.0f);
-            } catch (Exception e) {
-                Log.e("MainActivity", "重新创建 MediaPlayer 失败: " + e.getMessage());
+            mediaPlayer = createMediaPlayer();
+            if (mediaPlayer == null) {
+                Log.e("MainActivity", "重新创建 MediaPlayer 失败");
                 return;
             }
         }
@@ -255,14 +303,12 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback
                 mediaPlayer.stop();
             }
             mediaPlayer.reset();
-            // 从配置文件获取音频资源ID
-            int soundResourceId = getResources().getIdentifier(
-                getString(R.string.detection_sound_resource), 
-                "raw", 
-                getPackageName()
-            );
-            mediaPlayer = MediaPlayer.create(this, soundResourceId);
-            mediaPlayer.setVolume(1.0f, 1.0f);
+            
+            if (!loadAudioFromAssets(mediaPlayer)) {
+                Log.e("MainActivity", "重新加载音频文件失败");
+                return;
+            }
+            
             mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
@@ -314,22 +360,11 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback
         current_target_label = getResources().getInteger(R.integer.default_target_label);
         
         // 初始化 MediaPlayer
-        try {
-            // 从配置文件获取音频资源ID
-            int soundResourceId = getResources().getIdentifier(
-                getString(R.string.detection_sound_resource), 
-                "raw", 
-                getPackageName()
-            );
-            mediaPlayer = MediaPlayer.create(this, soundResourceId);
-            if (mediaPlayer == null) {
-                Log.e("MainActivity", "创建 MediaPlayer 失败");
-            } else {
-                mediaPlayer.setVolume(1.0f, 1.0f);
-                Log.i("MainActivity", "MediaPlayer 初始化成功");
-            }
-        } catch (Exception e) {
-            Log.e("MainActivity", "初始化 MediaPlayer 失败: " + e.getMessage());
+        mediaPlayer = createMediaPlayer();
+        if (mediaPlayer == null) {
+            Log.e("MainActivity", "创建 MediaPlayer 失败");
+        } else {
+            Log.i("MainActivity", "MediaPlayer 初始化成功");
         }
         
         // 隐藏ActionBar
